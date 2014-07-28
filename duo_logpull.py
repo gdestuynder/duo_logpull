@@ -4,6 +4,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import sys
+import os
+import imp
 sys.path.append('duo_client')
 
 cfg_path = ['duo_logpull.conf']
