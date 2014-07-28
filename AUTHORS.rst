@@ -1,0 +1,4 @@
+AUTHORS
+-------
+
+gdestuynder@mozilla.com

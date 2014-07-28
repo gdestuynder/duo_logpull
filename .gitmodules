@@ -1,0 +1,6 @@
+[submodule "duo_client"]
+	path = duo_client
+	url = ./duo_client
+[submodule "mozdef_lib"]
+	path = mozdef
+	url = ./mozdef_lib
