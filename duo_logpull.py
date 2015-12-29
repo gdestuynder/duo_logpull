@@ -23,7 +23,7 @@ if config == None:
     sys.exit(1)
 
 import duo_client
-import mozdef
+import mozdef_client as mozdef
 import time
 from datetime import datetime
 import pytz
