@@ -26,13 +26,18 @@ import duo_client
 import mozdef_client as mozdef
 import time
 from datetime import datetime
+from datetime import timezone
 import json
 import pickle
 
 
 duo = duo_client.Admin(ikey=config.IKEY, skey=config.SKEY, host=config.URL)
-mozmsg = mozdef.MozDefMsg(config.MOZDEF_URL, tags=['duosecurity', 'logs'])
-mozmsg.debug = config.DEBUG
+mozmsg = mozdef.MozDefEvent(config.MOZDEF_URL)
+mozmsg.tags = ['duosecurity', 'logs']
+
+if config.DEBUG:
+    mozmsg.debug = config.DEBUG
+    mozmsg.set_send_to_syslog(True, only_syslog=True)
 
 def process_events(duo_events, etype, state):
     # There are some key fields that we use as MozDef fields, those are set to "noconsume"
@@ -50,8 +55,11 @@ def process_events(duo_events, etype, state):
 
     for e in duo_events:
         details = {}
-        mozmsg.log['timestamp'] = e['timestamp']
-        mozmsg.log['hostname'] = e['host']
+        # Timestamp format: http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
+        # Duo logs come as a UTC timestamp
+        dt = datetime.utcfromtimestamp(e['timestamp'])
+        mozmsg.timestamp = dt.replace(tzinfo=timezone.utc).isoformat()
+        mozmsg.hostname = e['host']
         for i in e:
             if i in noconsume:
                 continue
@@ -64,12 +72,15 @@ def process_events(duo_events, etype, state):
                 continue
 
             details[i] = e[i]
+        mozmsg.details = details
         if etype == 'administration':
-          mozmsg.send(e['action'], details=details)
+            mozmsg.summary = e['action']
         elif etype == 'telephony':
-          mozmsg.send(e['context'], details=details)
+          mozmsg.summary = e['context']
         elif etype == 'authentication':
-          mozmsg.send(e['eventtype']+' '+e['result']+' for '+e['username'], details=details)
+          mozmsg.summary = e['eventtype']+' '+e['result']+' for '+e['username']
+
+        mozmsg.send()
 
     # last event timestamp record is stored and returned so that we can save our last position in the log.
     try:
