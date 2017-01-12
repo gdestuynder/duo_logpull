@@ -6,7 +6,6 @@
 import sys
 import os
 import imp
-sys.path.append('duo_client')
 
 cfg_path = ['duo_logpull.conf']
 config = None
