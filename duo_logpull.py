@@ -34,10 +34,28 @@ import pickle
 duo = duo_client.Admin(ikey=config.IKEY, skey=config.SKEY, host=config.URL)
 mozmsg = mozdef.MozDefEvent(config.MOZDEF_URL)
 mozmsg.tags = ['duosecurity', 'logs']
+mozmsg.category = 'Authentication'
+mozmsg.source = 'DuoSecurity API'
 
 if config.DEBUG:
     mozmsg.debug = config.DEBUG
     mozmsg.set_send_to_syslog(True, only_syslog=True)
+
+def normalize(details):
+    # Normalizes fields to conform to http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
+    # This is mainly used for common field names to put inside the details structure
+    # There might be faster ways to do this
+    normalized = {}
+
+    for f in details:
+        if f in ("ip", "ip_address"):
+            normalized["sourceipaddress"] = details[f]
+            continue
+        if f == "result":
+            if details[f] != "SUCCESS":
+                normalized["error"] = True
+        normalized[f] = details[f]
+    return normalized
 
 def process_events(duo_events, etype, state):
     # There are some key fields that we use as MozDef fields, those are set to "noconsume"
@@ -72,7 +90,7 @@ def process_events(duo_events, etype, state):
                 continue
 
             details[i] = e[i]
-        mozmsg.details = details
+        mozmsg.details = normalize(details)
         if etype == 'administration':
             mozmsg.summary = e['action']
         elif etype == 'telephony':
