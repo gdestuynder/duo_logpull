@@ -26,7 +26,6 @@ import duo_client
 import mozdef_client as mozdef
 import time
 from datetime import datetime
-import pytz
 import json
 import pickle
 
@@ -51,7 +50,7 @@ def process_events(duo_events, etype, state):
 
     for e in duo_events:
         details = {}
-        mozmsg.log['timestamp'] = pytz.timezone('UTC').localize(datetime.utcfromtimestamp(e['timestamp'])).isoformat()
+        mozmsg.log['timestamp'] = e['timestamp']
         mozmsg.log['hostname'] = e['host']
         for i in e:
             if i in noconsume:

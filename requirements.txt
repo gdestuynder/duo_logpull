@@ -1,3 +1,2 @@
-pytz==2014.1
-mozdef_lib
+mozdef_client
 duo_client
