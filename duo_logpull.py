@@ -24,8 +24,20 @@ if config == None:
 import duo_client
 import mozdef_client as mozdef
 import time
-from datetime import datetime
-from datetime import timezone
+from datetime import datetime, timedelta, tzinfo
+try:
+    from datetime import timezone
+    utc = timezone.utc
+except ImportError:
+    #Hi there python2 user
+    class UTC(tzinfo):
+        def utcoffset(self, dt):
+            return timedelta(0)
+        def tzname(self, dt):
+            return "UTC"
+        def dst(self, dt):
+            return timedelta(0)
+    utc = UTC()
 import json
 import pickle
 
@@ -75,7 +87,7 @@ def process_events(duo_events, etype, state):
         # Timestamp format: http://mozdef.readthedocs.io/en/latest/usage.html#mandatory-fields
         # Duo logs come as a UTC timestamp
         dt = datetime.utcfromtimestamp(e['timestamp'])
-        mozmsg.timestamp = dt.replace(tzinfo=timezone.utc).isoformat()
+        mozmsg.timestamp = dt.replace(tzinfo=utc).isoformat()
         mozmsg.hostname = e['host']
         for i in e:
             if i in noconsume:
