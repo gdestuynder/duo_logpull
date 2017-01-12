@@ -16,6 +16,5 @@ All log info will be in MozDef's details field. Timestamps are automatically con
 Python dependencies
 ~~~~~~~~~~~~~~~~~~~
 
-* pytz
-* mozdef_lib (https://github.com/gdestuynder/mozdef_lib)
+* mozdef_client (https://github.com/gdestuynder/mozdef_client)
 * duo_client (https://github.com/duosecurity/duo_client_python/)
